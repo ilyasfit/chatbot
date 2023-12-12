@@ -3,3 +3,7 @@ langchain
 openai
 tiktoken
 python-dotenv
+qdrant_client
+
+streamlit
+
