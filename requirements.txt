@@ -1,0 +1,5 @@
+discord.py
+langchain
+openai
+tiktoken
+python-dotenv
