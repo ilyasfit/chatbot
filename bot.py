@@ -19,12 +19,20 @@ intents.message_content = True
 intents.typing = True
 intents.messages = True
 
+channel_id_1 = int(os.getenv('TARGET_CHANNEL_ID'))
+channel_id_2 = int(os.getenv('TARGET_CHANNEL_ID_2'))
+target_channels = [channel_id_1, channel_id_2]
+
 bot = commands.Bot(command_prefix='!', intents=intents)
 last_message_id = None
 
 @bot.event
 async def on_message(message):
     global last_message_id
+
+    if message.channel.id not in target_channels:
+        print("Not in target channel")
+        return
 
     # Überprüfe, ob die Nachricht eine Antwort ist
     if message.reference:
