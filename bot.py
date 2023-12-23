@@ -1,9 +1,9 @@
-import discord
-from discord.ext import commands
+import os
 from dotenv import load_dotenv
 load_dotenv()
+import discord
+from discord.ext import commands
 
-import os
 from langchain.chat_models import ChatOpenAI
 from langchain.schema import HumanMessage
 from langchain.vectorstores import Qdrant
@@ -22,6 +22,8 @@ intents.messages = True
 channel_id_1 = int(os.getenv('TARGET_CHANNEL_ID'))
 channel_id_2 = int(os.getenv('TARGET_CHANNEL_ID_2'))
 target_channels = [channel_id_1, channel_id_2]
+
+
 
 bot = commands.Bot(command_prefix='!', intents=intents)
 last_message_id = None

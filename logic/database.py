@@ -20,20 +20,6 @@ client = qdrant_client.QdrantClient(
 )
 
 
-# def get_images_from_collection():
-#     # """
-#     # Abrufen aller Dokumente aus der Image Collection.
-#     # """
-#     search_results = client.search(
-#         collection_name=img_collection,
-#         query_vector=[0]*1536,  # Dummy-Vector, da wir alle Dokumente abrufen wollen
-#         limit=100  # Anzahl der abzurufenden Dokumente
-#     )
-#     print("Results: ", search_results)
-#     return search_results
-
-
-
 def get_documents(collection_name):
     # Erstellen Sie einen Dummy-Vector mit der gleichen Dimension wie Ihre Embeddings
     dummy_vector = [0] * 1536
@@ -149,10 +135,10 @@ def save_image(img_link, keywords):
     img_id = str(generate_uuid())
 
     # Verarbeiten Sie die Keywords und erstellen Sie ein Document-Objekt
-    vector = embeddings.embed_query(" ".join(keywords))
+    vector = embeddings.embed_query(keywords)
 
     document = Document(
-        page_content=" ".join(keywords),  # Verwenden Sie die Keywords als page_content
+        page_content=keywords,  # Verwenden Sie die Keywords als page_content
         metadata={"img_link": img_link}   # Fügen Sie den Bildlink als Metadata hinzu
     )
     vectorstore.add_documents([document], ids=[img_id])
@@ -202,7 +188,6 @@ def search_image(query):
     return img_links
 
 
-
 def save_knowledge(text_chunks):
     # vectorstore = FAISS.from_texts(texts=text_chunks, embedding=embeddings)
 
@@ -246,6 +231,27 @@ def get_collection(collection_name):
             vectors_config=vectors_config,
         )
         print("Collection created: ", client.get_collection(collection_name=collection_name))
+
+
+
+
+
+def save_single_document(content):
+    # Generieren Sie eine eindeutige ID für das Dokument
+    doc_id = str(generate_uuid())
+
+    # Verarbeiten Sie den Inhalt und erstellen Sie ein Document-Objekt
+    vector = embeddings.embed_query(content)
+
+    document = Document(
+        page_content=content,  # Verwenden Sie den gesamten Inhalt als page_content
+    )
+
+    # Speichern des Dokuments im Vectorstore
+    vectorstore = get_vectorstore(knowledge_collection)
+    vectorstore.add_documents([document], ids=[doc_id])
+
+    print(f"Dokument {doc_id} erfolgreich hinzugefügt.")
 
 
 def generate_uuid():

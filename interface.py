@@ -4,7 +4,7 @@ import os
 
 import streamlit as st
 from logic.database import get_documents, save_knowledge, save_image, search_documents, update_document, update_image_document
-from logic.textProcessing import get_pdf_text, get_text_chunks
+from logic.textProcessing import process_files, save_knowledge_from_files
 
 def load_documents(collection_name):
     # Überprüfen, ob die Dokumente bereits im session_state gespeichert sind
@@ -101,6 +101,9 @@ def display_documents(documents):
             #     st.success("Dokument gelöscht!")
 
 
+
+
+
 def main():
     # Radio-Buttons zur Auswahl des Tabs
     tab_choice = st.sidebar.radio("Tab auswählen", ["Knowledge", "Images"])
@@ -108,23 +111,33 @@ def main():
     if 'current_page_knowledge' not in st.session_state:
         st.session_state['current_page_knowledge'] = 0
 
+    # Zustandsvariable für den Split-Schalter
+    if 'split_documents' not in st.session_state:
+        st.session_state['split_documents'] = True
+
+
     if tab_choice == "Knowledge":
         knowledge_tab()
-        st.sidebar.header("Knowledge hinzufügen")
-        # Sidebar-Inhalte für Knowledge Tab
-        pdf_docs = st.sidebar.file_uploader("Upload PDFs", accept_multiple_files=True)
-        if st.sidebar.button("Prozessieren und hochladen"):
-            with st.spinner("Prozessieren..."): # Animation
-                # get pdf text
-                raw_text = get_pdf_text(pdf_docs)
+        with st.sidebar:
+            # Schalter zum Umschalten zwischen Splitten und Nicht-Splitten
+            st.header("Dokumenteinstellungen")
+            st.session_state['split_documents'] = st.toggle(
+                "Dokumente splitten",
+                value=st.session_state['split_documents']
+            )
 
-                # get text chunks
-                text_chunks = get_text_chunks(raw_text) # will return a list
-
-                # create vector store
-                st.session_state.vectorstore = save_knowledge(text_chunks)
-                
-                st.rerun()
+            st.header("Knowledge hinzufügen")
+            # Sidebar-Inhalte für Knowledge Tab
+            files = st.file_uploader("Dateien hochladen (PDF/TXT)", accept_multiple_files=True)
+            if st.button("Prozessieren und hochladen"):
+                with st.spinner("Prozessieren..."): # Animation
+                    if st.session_state['split_documents']:
+                        # Dokumente splitten und verarbeiten
+                        chunks = process_files(files=files)
+                        save_knowledge(chunks)
+                    else:
+                        # Jedes File als ein Dokument hochladen
+                        save_knowledge_from_files(files)
             
 
 
@@ -139,8 +152,6 @@ def main():
             if img_link and keywords:
                 with st.spinner("Prozessieren..."): # Animation
                     save_image(img_link, keywords)
-                st.sidebar.success("Bild erfolgreich hinzugefügt!")
-                st.rerun()
             else:
                 st.sidebar.error("Bitte geben Sie sowohl einen Bildlink als auch Keywords ein.")
 
