@@ -21,6 +21,9 @@ intents.messages = True
 
 channel_id_1 = int(os.getenv('TARGET_CHANNEL_ID'))
 channel_id_2 = int(os.getenv('TARGET_CHANNEL_ID_2'))
+
+channel_id_3 = int(1179878996108914728)
+
 target_channels = [channel_id_1, channel_id_2]
 
 
